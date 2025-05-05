@@ -16,8 +16,9 @@ const io = socketIO(server, {
 });
 
 app.use(cors());
-app.use(express.static(path.join(__dirname, 'server')));
-
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, '../public', 'index.html'));
+});
 const playerActivity = new Map();
 const lastChatMessage = new Map();
 const INACTIVITY_TIMEOUT = 120000;
