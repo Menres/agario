@@ -16,7 +16,7 @@ const io = socketIO(server, {
 });
 
 app.use(cors());
-app.use(express.static(path.join(__dirname, 'client')));
+app.use(express.static(path.join(__dirname, 'server')));
 
 const playerActivity = new Map();
 const lastChatMessage = new Map();
