@@ -1,6 +1,6 @@
 let player;
 let foods = [];
-let otherPlayers = new Map(); // Просто храним объекты Player
+let otherPlayers = new Map();
 let cameraX = 0;
 let cameraY = 0;
 let targetCameraX = 0;
@@ -26,16 +26,13 @@ let lastDirectionX = 0;
 let lastDirectionY = 0;
 let lastFrameTime = Date.now();
 let eatenFoodIds = new Set();
-let lastLogTime = 0;
-const LOG_INTERVAL = 1000; // Логи раз в секунду
-let zoom = 1.0; // Переменная масштабирования
-const minZoom = 0.5; // Минимальный масштаб
-const maxZoom = 2.0; // Максимальный масштаб
-const PLAYER_TIMEOUT = 10000; // 10 секунд для удаления устаревших игроков
+let zoom = 1.0;
+const minZoom = 0.5;
+const maxZoom = 2.0;
+const PLAYER_TIMEOUT = 10000;
 
 function setup() {
     if (!window.createCanvas) {
-        console.error('p5.js not loaded');
         return;
     }
     window.createCanvas(windowWidth, windowHeight);
@@ -73,15 +70,13 @@ function setup() {
     chatInput.class('chat-input');
 
     socket.on('connect', () => {
-        console.log('Connected to server:', socket.id);
         if (!socket.id) {
-            console.error('Socket ID is undefined. Check server connection.');
+            return;
         }
     });
 
     socket.on('setPlayerNameResponse', (data) => {
         if (data.success && data.player) {
-            console.log('Игрок создан:', data.player);
             player = new Player(socket.id, data.player.x, data.player.y, data.player.size, data.player.name);
             playerName = data.player.name;
             nickInput.hide();
@@ -92,7 +87,6 @@ function setup() {
             gameState = 'playing';
             gameInitialized = true;
         } else {
-            console.warn('Не удалось создать игрока:', data.message);
             window.alert(data.message);
             gameState = 'menu';
             showMenu();
@@ -101,7 +95,6 @@ function setup() {
 
     socket.on('playerInactive', (socketId) => {
         if (socketId === socket.id) {
-            console.log('Вы были удалены из игры из-за неактивности.');
             gameState = 'menu';
             showMenu();
             setTimeout(() => {
@@ -109,7 +102,6 @@ function setup() {
             }, 1000);
         } else {
             if (otherPlayers.has(socketId)) {
-                console.log(`Игрок ${socketId} стал неактивным и удалён.`);
                 otherPlayers.delete(socketId);
             }
         }
@@ -117,27 +109,20 @@ function setup() {
 
     socket.on('updateGameState', (data) => {
         if (!data || !Array.isArray(data.foods) || !data.players || !data.serverTime) {
-            console.error('Invalid game state data:', data);
             return;
         }
 
         const clientTime = Date.now();
-        const lag = Math.min(clientTime - data.serverTime, 1000);
-
-        // Обновляем eatenFoodIds
         eatenFoodIds.forEach(id => {
             if (!data.foods.find(f => f.id === id)) {
                 eatenFoodIds.delete(id);
             }
         });
 
-        // Обновляем еду
         const newFoods = [];
         const existingFoodMap = new Map(foods.map(food => [food.id, food]));
-
         data.foods.forEach(f => {
             if (!f.id || !isFinite(f.x) || !isFinite(f.y) || !isFinite(f.size)) {
-                console.warn(`Некорректная еда:`, f);
                 return;
             }
             if (existingFoodMap.has(f.id)) {
@@ -159,7 +144,6 @@ function setup() {
         for (let id in data.players) {
             const p = data.players[id];
             if (!p || !isFinite(p.x) || !isFinite(p.y) || !isFinite(p.size)) {
-                console.warn(`Игрок ${id} имеет некорректные данные:`, p);
                 continue;
             }
 
@@ -182,19 +166,12 @@ function setup() {
                     const newPlayer = new Player(id, p.x, p.y, p.size || 20, p.name || `Player${id.slice(0, 4)}`);
                     newPlayer.lastUpdate = clientTime;
                     otherPlayers.set(id, newPlayer);
-                    console.log(`Добавлен новый игрок ${id}: x=${p.x}, y=${p.y}, name=${p.name}`);
                 }
             }
         }
 
         scoreboard = playersData.sort((a, b) => b.size - a.size).slice(0, 5);
         gameInitialized = true;
-
-        const now = Date.now();
-        if (now - lastLogTime >= LOG_INTERVAL) {
-            console.log(`[CLIENT] Получено состояние игры: serverTime=${data.serverTime}, lag=${lag}, player=${player ? `x=${player.x}, y=${player.y}` : 'нет'}, otherPlayers=${otherPlayers.size}, foods=${foods.length}`);
-            lastLogTime = now;
-        }
     });
 
     socket.on('chatMessage', (data) => {
@@ -208,7 +185,6 @@ function setup() {
             setTimeout(() => alert('Вы были съедены!'), 100);
         }
         if (otherPlayers.has(data.eatenId)) {
-            console.log(`Игрок ${data.eatenId} был съеден ${data.eaterId} и удалён.`);
             otherPlayers.delete(data.eatenId);
         }
         window.redraw();
@@ -260,7 +236,6 @@ let lastUpdateTime = 0;
 
 function draw() {
     if (!window.background || !window.textAlign) {
-        console.error('p5.js functions not available');
         return;
     }
     window.clear();
@@ -304,7 +279,6 @@ function draw() {
             cameraX = window.lerp(cameraX, targetCameraX, 0.3);
             cameraY = window.lerp(cameraY, targetCameraY, 0.3);
         } else {
-            console.error(`Invalid player position: x=${player.x}, y=${player.y}`);
             cameraX = 0;
             cameraY = 0;
         }
@@ -326,28 +300,21 @@ function draw() {
         }
 
         if (!isPaused) {
-            player.interpolate(deltaTime, window);
-            otherPlayers.forEach(player => player.interpolate(deltaTime, window));
+            if (player) player.interpolate(deltaTime, window);
+            otherPlayers.forEach(p => p.interpolate(deltaTime, window));
         }
 
         player.display(window);
 
-        if (!isPaused && now - lastUpdateTime > 10) {
+        if (!isPaused && now - lastUpdateTime > 5) {
             socket.emit('updatePlayerPosition', { directionX, directionY });
             lastUpdateTime = now;
             lastDirectionX = directionX;
             lastDirectionY = directionY;
-
-            if (now - lastLogTime >= LOG_INTERVAL) {
-                console.log(`[CLIENT] Отправлена позиция игрока ${socket.id}: directionX=${directionX}, directionY=${directionY}, x=${player.x}, y=${player.y}, cameraX=${cameraX}, cameraY=${cameraY}, zoom=${zoom}`);
-                lastLogTime = now;
-            }
         }
 
-        // Удаляем устаревших игроков
         otherPlayers.forEach((player, id) => {
             if (now - player.lastUpdate > PLAYER_TIMEOUT) {
-                console.log(`Игрок ${id} не обновлялся ${PLAYER_TIMEOUT} мс и удалён.`);
                 otherPlayers.delete(id);
             } else {
                 player.display(window);
@@ -357,10 +324,8 @@ function draw() {
         for (let i = 0; i < foods.length; i++) {
             let food = foods[i];
             if (!food || !isFinite(food.x) || !isFinite(food.y) || !food.id) {
-                console.warn(`Некорректная еда на индексе ${i}:`, food);
                 continue;
             }
-            // Отображаем только еду в области видимости
             if (
                 food.x > cameraX - food.size &&
                 food.x < cameraX + windowWidth / zoom + food.size &&
@@ -372,10 +337,8 @@ function draw() {
             let d = window.dist(player.x, player.y, food.x, food.y);
             if (!isPaused && d < (player.size + food.size) / 2 && !eatenFoodIds.has(food.id)) {
                 if (!isFinite(player.x) || !isFinite(player.y)) {
-                    console.warn(`Некорректные координаты игрока: x=${player.x}, y=${player.y}`);
                     continue;
                 }
-                console.log(`Клиент: Попытка съесть еду id=${food.id}: playerX=${player.x}, playerY=${player.y}, foodX=${food.x}, foodY=${food.y}, distance=${d}, required=${(player.size + food.size) / 2}`);
                 socket.emit('eatFood', { id: food.id, playerX: player.x, playerY: player.y });
                 eatenFoodIds.add(food.id);
             }
@@ -483,7 +446,6 @@ function keyPressed() {
     if (window.keyCode === 80) {
         isPaused = !isPaused;
         socket.emit('setPaused', isPaused);
-        console.log(`Игра ${isPaused ? 'на паузе' : 'возобновлена'}`);
     }
 }
 
@@ -507,7 +469,6 @@ function mouseWheel(event) {
         const zoomSpeed = 0.1;
         zoom += event.delta > 0 ? -zoomSpeed : zoomSpeed;
         zoom = window.constrain(zoom, minZoom, maxZoom);
-        console.log(`[CLIENT] Масштаб изменён: zoom=${zoom}`);
         return false;
     }
 }
