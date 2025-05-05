@@ -40,7 +40,6 @@ io.on('connection', (socket) => {
 
     socket.on('setPlayerName', (name) => {
         if (typeof name !== 'string' || name.trim() === '') {
-            console.error('Некорректное имя игрока:', name);
             socket.emit('setPlayerNameResponse', { success: false, message: 'Некорректное имя' });
             return;
         }
@@ -87,7 +86,6 @@ io.on('connection', (socket) => {
 
     socket.on('updatePlayerPosition', (data) => {
         if (!data || typeof data.directionX !== 'number' || typeof data.directionY !== 'number' || !isFinite(data.directionX) || !isFinite(data.directionY)) {
-            console.error('Некорректное обновление позиции от', socket.id, ':', data);
             return;
         }
         const magnitude = Math.sqrt(data.directionX ** 2 + data.directionY ** 2);
@@ -117,7 +115,6 @@ io.on('connection', (socket) => {
 
     socket.on('chatMessage', (data) => {
         if (!data || typeof data.name !== 'string' || typeof data.message !== 'string' || data.message.trim() === '') {
-            console.error('Некорректное сообщение чата:', data);
             return;
         }
         const now = Date.now();
@@ -167,9 +164,7 @@ process.on('SIGINT', () => {
 });
 
 io.on('error', (error) => {
-    console.error('Ошибка Socket.IO:', error);
 });
 
 server.on('error', (error) => {
-    console.error('Ошибка сервера:', error);
 });
