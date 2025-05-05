@@ -4,33 +4,19 @@ const socketIO = require('socket.io');
 const cors = require('cors');
 const path = require('path');
 const game = require('./game');
-const helmet = require('helmet'); // Добавляем helmet
 
 const app = express();
 const server = http.createServer(app);
 const io = socketIO(server, {
     cors: {
-        origin: ['agario-production-4f2c.up.railway.app'],
+        origin: '*',
         methods: ['GET', 'POST'],
         credentials: true
     }
 });
 
-app.use(helmet({
-    contentSecurityPolicy: {
-        directives: {
-            defaultSrc: ["'self'"], // Разрешаем ресурсы только с того же домена
-            imgSrc: ["'self'", "https://cdnjs.cloudflare.com", "data:"], // Разрешаем изображения с указанных источников
-            scriptSrc: ["'self'", "https://cdnjs.cloudflare.com", "'unsafe-inline'"], // Разрешаем скрипты (включая inline для p5.js)
-            styleSrc: ["'self'", "https://cdnjs.cloudflare.com", "'unsafe-inline'"], // Разрешаем стили
-            connectSrc: ["'self'", "https://*.railway.app"], // Разрешаем подключения к WebSocket
-            frameSrc: ["'self'"], // Разрешаем фреймы (если нужны)
-        }
-    }
-}));
-
 app.use(cors());
-app.use(express.static(path.join(__dirname, '..', 'client')));
+app.use(express.static(path.join(__dirname, 'client')));
 
 const playerActivity = new Map();
 const lastChatMessage = new Map();
