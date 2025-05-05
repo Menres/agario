@@ -2,8 +2,8 @@ const Player = require('./player-serv');
 const Food = require('./food-serv');
 const { v4: uuidv4 } = require('uuid');
 
-let canvasWidth = 2000;
-let canvasHeight = 2000;
+let canvasWidth = 1000;
+let canvasHeight = 1000;
 let players = new Map();
 const FOOD_COUNT = 80;
 const MAX_PLAYER_SIZE = 500;
