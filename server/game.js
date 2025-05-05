@@ -8,9 +8,6 @@ let players = new Map();
 const FOOD_COUNT = 80;
 const MAX_PLAYER_SIZE = 500;
 
-let lastLogTime = 0;
-const LOG_INTERVAL = 1000;
-
 function createFood() {
     const foods = [];
     const colors = [0, 1, 2, 3, 4, 5];
@@ -115,11 +112,6 @@ function updatePlayer(socketId, data, playerActivity, deltaTime) {
         return false;
     }
     try {
-        const magnitude = Math.sqrt(data.directionX ** 2 + data.directionY ** 2);
-        if (magnitude > 1.1) {
-            return false;
-        }
-
         const now = Date.now();
         if (player.isPaused) {
             return false;
@@ -139,7 +131,6 @@ function updatePlayer(socketId, data, playerActivity, deltaTime) {
     }
 }
 
-let lastFoodErrorTime = 0;
 function eatFood(socketId, data) {
     if (!data || typeof data.id !== 'string' || typeof data.playerX !== 'number' || !isFinite(data.playerX) || typeof data.playerY !== 'number' || !isFinite(data.playerY)) {
         return false;
@@ -157,7 +148,6 @@ function eatFood(socketId, data) {
         return false;
     }
     const d = Math.sqrt((data.playerX - food.x) ** 2 + (data.playerY - food.y) ** 2);
-    const now = Date.now();
     const requiredDistance = (player.size + food.size) / 2;
     if (d >= requiredDistance) {
         return false;
@@ -215,7 +205,6 @@ function checkPlayerCollisions(io) {
             const [id1, p1] = playerEntries[i];
             const [id2, p2] = playerEntries[j];
             const d = Math.sqrt((p1.x - p2.x) ** 2 + (p1.y - p2.y) ** 2);
-            const now = Date.now();
             const cacheKey = `${id1}:${id2}:${p1.x}:${p1.y}:${p2.x}:${p2.y}`;
             if (d < (p1.size + p2.size) / 2) {
                 if (p1.size > p2.size * 1.2) {
