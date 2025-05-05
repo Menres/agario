@@ -1,0 +1,92 @@
+html, body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    width: 100%;
+    height: 100vh;
+}
+
+canvas {
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+input[type="text"] {
+    padding: 10px;
+    font-size: 16px;
+    border: 2px solid #333;
+    border-radius: 5px;
+    outline: none;
+}
+
+input[type="text"]::placeholder {
+    color: #888;
+}
+
+button {
+    padding: 10px 20px;
+    font-size: 16px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.play-button, .theme-button, .scoreboard-button {
+    font-size: 16px;
+    font-family: Arial, sans-serif;
+    cursor: pointer;
+    border: none;
+    border-radius: 20px;
+    padding: 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    line-height: normal;
+}
+
+.play-button {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.play-button:hover {
+    background-color: #45a049;
+}
+
+.theme-button {
+    background-color: #666;
+    color: white;
+}
+
+.theme-button:hover {
+    background-color: #555;
+}
+
+.scoreboard-button {
+    background-color: #555;
+    color: white;
+    font-size: 13px;
+}
+
+.scoreboard-button:hover {
+    background-color: #444;
+}
+
+.chat-input {
+    font-size: 16px; /* Увеличиваем шрифт */
+    font-family: Arial, sans-serif;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: rgba(255, 255, 255, 0.9);
+    box-sizing: border-box;
+}
+
+.menu-text {
+    font-family: Arial, sans-serif;
+    font-size: 32px;
+}
