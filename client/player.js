@@ -18,8 +18,6 @@ class Player {
         this.maxSize = 500;
         this.lastUpdateTime = Date.now();
         this.lastClientUpdateTime = Date.now();
-        this.lastLogTime = 0;
-        this.LOG_INTERVAL = 1000;
 
         const colors = [
             [255, 87, 87],
@@ -44,22 +42,20 @@ class Player {
 
     interpolate(deltaTime, p) {
         const now = Date.now();
-        deltaTime = Math.min(deltaTime || (now - this.lastUpdateTime) / 1000, 0.1);
+        deltaTime = Math.min(deltaTime, 0.1); // Ограничиваем deltaTime для стабильности
         if (!isFinite(this.targetX) || !isFinite(this.targetY)) {
-            console.error(`[Player ${this.id}] Invalid target position for interpolation: targetX=${this.targetX}, targetY=${this.targetY}`);
             this.x = this.lastX;
             this.y = this.lastY;
         } else {
-            const factor = Math.min(1, deltaTime * 15);
+            const factor = Math.min(1, deltaTime * 20); // Увеличиваем скорость сглаживания
             this.x = p.lerp(this.x, this.targetX, factor);
             this.y = p.lerp(this.y, this.targetY, factor);
             if (!isFinite(this.x) || !isFinite(this.y)) {
-                console.error(`[Player ${this.id}] Interpolation resulted in invalid position: x=${this.x}, y=${this.y}`);
                 this.x = this.lastX;
                 this.y = this.lastY;
             }
         }
-        this.size = p.lerp(this.size, Math.min(this.targetSize, this.maxSize), 0.3);
+        this.size = p.lerp(this.size, Math.min(this.targetSize, this.maxSize), 0.5); // Ускоряем сглаживание размера
         this.lastUpdateTime = now;
         this.lastX = this.x;
         this.lastY = this.y;
@@ -68,11 +64,9 @@ class Player {
     display(p) {
         try {
             if (!p || typeof p.fill !== 'function' || typeof p.ellipse !== 'function' || typeof p.text !== 'function') {
-                console.error('p5.js is not available');
                 return;
             }
             if (!isFinite(this.x) || !isFinite(this.y) || !isFinite(this.size)) {
-                console.error(`[Player ${this.id}] Invalid render data: x=${this.x}, y=${this.y}, size=${this.size}`);
                 return;
             }
             p.fill(this.color[0], this.color[1], this.color[2]);
@@ -90,8 +84,6 @@ class Player {
             p.fill(255);
             p.text(this.name, this.x, this.y - this.size / 2 - textSize * 0.6);
             p.noStroke();
-        } catch (error) {
-            console.error(`[Player ${this.id}] Error rendering player:`, error);
-        }
+        } catch (error) {}
     }
 }
