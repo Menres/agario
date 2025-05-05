@@ -1,4 +1,4 @@
-const socket = io('/', {
+const socket = io('https://agario-production-869e.up.railway.app', {
     reconnectionAttempts: 10,
     timeout: 10000,
     reconnectionDelay: 1000,
