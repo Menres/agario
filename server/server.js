@@ -9,7 +9,7 @@ const app = express();
 const server = http.createServer(app);
 const io = socketIO(server, {
     cors: {
-        origin: '*',
+        origin: ['https://agario-production-869e.up.railway.app'],
         methods: ['GET', 'POST'],
         credentials: true
     }
